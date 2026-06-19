@@ -247,7 +247,7 @@ Minimum rules from [architecture.md §7.7](./architecture.md). Validator must en
 | VR-4 | Preferences | Each preference ≥1 reflection | FIX-JP ✅ |
 | VR-5 | Constraints | Each constraint addressed | FIX-JP (crowds) ✅ |
 
-**Live FIX-JP deterministic checks (2026-06-18):** duration ✅, destinations ✅, budget ✅ (1420 vs 3000 USD), preference:food ✅, preference:temples ✅, constraint:avoid crowds ✅.
+**Live FIX-JP deterministic checks (2026-06-18):** duration ✅, destinations ✅, budget ✅ (1555 vs 3000 USD), preference:food ✅, preference:temples ✅, constraint:avoid crowds ✅.
 
 ---
 
@@ -292,7 +292,7 @@ Before marking the milestone complete:
 | India state (FIX-IN) | `outputs/fdbf1948-9079-4f3b-a97a-8dd9e1205e91/state.json` | 2026-06-18 | Live run |
 | Run trace (FIX-JP) | `outputs/8c3ff70a-b7e4-48a1-9065-7a5157707ffb/trace.md` | 2026-06-18 | Live run |
 | Run trace (FIX-IN) | `outputs/fdbf1948-9079-4f3b-a97a-8dd9e1205e91/trace.md` | 2026-06-18 | Live run |
-| Evidence manifest | `outputs/evidence_manifest.json` | 2026-06-18 | Automated |
+| Evidence manifest (committed) | `tests/fixtures/evidence_manifest.json` | 2026-06-18 | Repo fixture |
 | Prior Japan run | `outputs/last_run_output.json` | 2026-06-18 | Live run (archive) |
 | Test run log | `pytest tests/ -q` → 73 passed, 2 skipped | 2026-06-18 | Automated |
 | Repo hygiene | `pytest tests/test_repo_hygiene.py` → 6 passed | 2026-06-18 | Automated |

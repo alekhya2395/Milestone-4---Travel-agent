@@ -1,0 +1,465 @@
+{
+  "raw_request": "Plan a 5-day trip to Japan. Tokyo + Kyoto. $3,000 budget. Love food and temples, hate crowds.",
+  "trip_spec": {
+    "duration_days": 5,
+    "destinations": [
+      "Tokyo",
+      "Kyoto"
+    ],
+    "country": "Japan",
+    "budget_amount": 3000.0,
+    "budget_currency": "USD",
+    "preferences": [
+      "food",
+      "temples"
+    ],
+    "constraints": [
+      "avoid crowds"
+    ],
+    "travel_style": "mid-range",
+    "party_size": 1,
+    "assumptions": [
+      "party size is 1",
+      "travel style is mid-range"
+    ]
+  },
+  "destination_research": {
+    "cities": [
+      {
+        "city": "Tokyo",
+        "vibe": "Vibrant and bustling",
+        "pois": [
+          {
+            "name": "Tsukiji Fish Market",
+            "category": "food",
+            "best_time": "early morning (estimated: true)",
+            "estimated_duration_hours": 2.5,
+            "estimated": true
+          },
+          {
+            "name": "Meiji Shrine",
+            "category": "temples",
+            "best_time": "late afternoon (estimated: true)",
+            "estimated_duration_hours": 1.5,
+            "estimated": true
+          },
+          {
+            "name": "Shibuya Crossing",
+            "category": "culture",
+            "best_time": "evening (estimated: true)",
+            "estimated_duration_hours": 1.0,
+            "estimated": true
+          }
+        ],
+        "crowd_tips": [
+          "Visit popular areas early in the morning or late in the evening to avoid crowds (estimated: true)",
+          "Consider visiting during the week instead of weekends (estimated: true)"
+        ]
+      },
+      {
+        "city": "Kyoto",
+        "vibe": "Historic and serene",
+        "pois": [
+          {
+            "name": "Fushimi Inari Shrine",
+            "category": "temples",
+            "best_time": "early morning (estimated: true)",
+            "estimated_duration_hours": 2.0,
+            "estimated": true
+          },
+          {
+            "name": "Kinkaku-ji Temple",
+            "category": "temples",
+            "best_time": "late afternoon (estimated: true)",
+            "estimated_duration_hours": 1.5,
+            "estimated": true
+          },
+          {
+            "name": "Gion District",
+            "category": "food",
+            "best_time": "evening (estimated: true)",
+            "estimated_duration_hours": 2.0,
+            "estimated": true
+          }
+        ],
+        "crowd_tips": [
+          "Visit popular temples and shrines during the week instead of weekends (estimated: true)",
+          "Consider visiting during the spring or autumn to avoid peak tourist season (estimated: true)"
+        ]
+      }
+    ]
+  },
+  "accommodation_options": {
+    "cities": [
+      {
+        "city": "Tokyo",
+        "neighborhoods": [
+          "Shibuya",
+          "Shinjuku",
+          "Asakusa"
+        ],
+        "lodging_tiers": [
+          {
+            "tier": "budget",
+            "example_type": "hostel",
+            "estimated_nightly_min": 20.0,
+            "estimated_nightly_max": 50.0,
+            "estimated": true
+          },
+          {
+            "tier": "mid-range",
+            "example_type": "hotel",
+            "estimated_nightly_min": 80.0,
+            "estimated_nightly_max": 150.0,
+            "estimated": true
+          },
+          {
+            "tier": "upscale",
+            "example_type": "luxury hotel",
+            "estimated_nightly_min": 200.0,
+            "estimated_nightly_max": 500.0,
+            "estimated": true
+          }
+        ],
+        "notes": "Consider staying near a major train station for easy access to the city."
+      },
+      {
+        "city": "Kyoto",
+        "neighborhoods": [
+          "Gion",
+          "Kiyamachi",
+          "Kawaramachi"
+        ],
+        "lodging_tiers": [
+          {
+            "tier": "budget",
+            "example_type": "guesthouse",
+            "estimated_nightly_min": 30.0,
+            "estimated_nightly_max": 60.0,
+            "estimated": true
+          },
+          {
+            "tier": "mid-range",
+            "example_type": "ryokan",
+            "estimated_nightly_min": 100.0,
+            "estimated_nightly_max": 200.0,
+            "estimated": true
+          },
+          {
+            "tier": "upscale",
+            "example_type": "luxury ryokan",
+            "estimated_nightly_min": 250.0,
+            "estimated_nightly_max": 600.0,
+            "estimated": true
+          }
+        ],
+        "notes": "Look for accommodations near the Kamo River for scenic views and easy access to temples."
+      }
+    ]
+  },
+  "transport_plan": {
+    "inter_city_legs": [
+      {
+        "from_location": "Tokyo",
+        "to_location": "Kyoto",
+        "mode": "Bullet Train",
+        "estimated_duration": "2.5 hours",
+        "estimated_cost": 130.0,
+        "estimated": true,
+        "notes": "Consider purchasing a Japan Rail Pass for convenience and potential cost savings"
+      }
+    ],
+    "airport_transfers": [
+      {
+        "from_location": "Tokyo Narita or Haneda Airport",
+        "to_location": "Tokyo city center",
+        "mode": "Train or Bus",
+        "estimated_duration": "1-2 hours",
+        "estimated_cost": 20.0,
+        "estimated": true,
+        "notes": ""
+      },
+      {
+        "from_location": "Kyoto city center",
+        "to_location": "Kyoto Kansai International Airport or Osaka Itami Airport",
+        "mode": "Train or Bus",
+        "estimated_duration": "1-2 hours",
+        "estimated_cost": 20.0,
+        "estimated": true,
+        "notes": ""
+      }
+    ],
+    "local_transit": [
+      {
+        "city": "Tokyo",
+        "notes": [
+          "Tokyo has an extensive public transportation system, including subways, buses, and trains",
+          "Consider purchasing a Suica or Pasmo card for convenient travel"
+        ],
+        "pass_suggestions": [
+          "Suica card",
+          "Pasmo card"
+        ]
+      },
+      {
+        "city": "Kyoto",
+        "notes": [
+          "Kyoto has a well-developed public transportation system, including subways, buses, and trains",
+          "Consider purchasing a Kyoto City Bus One-day Pass or a Subway One-day Pass"
+        ],
+        "pass_suggestions": [
+          "Kyoto City Bus One-day Pass",
+          "Subway One-day Pass"
+        ]
+      }
+    ]
+  },
+  "budget_breakdown": {
+    "currency": "USD",
+    "line_items": [
+      {
+        "category": "lodging",
+        "amount": 600.0,
+        "estimated": true,
+        "notes": "Estimated 4 nights (2 in Tokyo, 2 in Kyoto) at mid-range prices. Tokyo: 2 nights @ ~$130/night; Kyoto: 2 nights @ ~$170/night."
+      },
+      {
+        "category": "transport",
+        "amount": 245.0,
+        "estimated": true,
+        "notes": "Includes inter-city bullet train (Tokyo-Kyoto: $130), two airport transfers ($20 each), and local transit for 5 days @ ~$15/day."
+      },
+      {
+        "category": "food",
+        "amount": 400.0,
+        "estimated": true,
+        "notes": "Estimated 5 days of mid-range dining @ ~$80/day, covering three meals and snacks."
+      },
+      {
+        "category": "activities",
+        "amount": 105.0,
+        "estimated": true,
+        "notes": "Includes estimated entrance fees for Kinkaku-ji ($5), other temples/museums (~$20), and one cultural experience (e.g., tea ceremony, cooking class) (~$80)."
+      },
+      {
+        "category": "buffer",
+        "amount": 205.0,
+        "estimated": true,
+        "notes": "Approximately 15% of the total estimated costs for unforeseen expenses or minor splurges."
+      }
+    ],
+    "total_estimated": 1555.0,
+    "budget_ceiling": 3000.0,
+    "over_budget": false,
+    "tradeoff_suggestions": [
+      "The current estimated costs are significantly below the budget ceiling, providing ample flexibility. Consider allocating remaining funds to enhance specific experiences, such as a premium ryokan stay, a high-end dining experience (e.g., omakase sushi), or a private guided tour.",
+      "Alternatively, the surplus budget allows for a dedicated shopping allowance for souvenirs or local crafts, which are not explicitly covered in the current activity estimates.",
+      "If cost-saving becomes a priority, minor adjustments like utilizing convenience stores for some meals or opting for slightly more budget-friendly accommodations could further reduce expenses, freeing up funds for other travel goals."
+    ]
+  },
+  "draft_itinerary": {
+    "days": [
+      {
+        "day": 1,
+        "city": "Tokyo",
+        "theme": "food and culture",
+        "activities": [
+          "Visit Tsukiji Fish Market in the early morning",
+          "Explore Asakusa neighborhood"
+        ],
+        "logistics": "Stay in Asakusa neighborhood for easy access to the city"
+      },
+      {
+        "day": 2,
+        "city": "Tokyo",
+        "theme": "temples and culture",
+        "activities": [
+          "Visit Meiji Shrine in the late afternoon",
+          "Explore Shibuya neighborhood, visit Shibuya Crossing in the early morning"
+        ],
+        "logistics": "Use Suica or Pasmo card for convenient travel"
+      },
+      {
+        "day": 3,
+        "city": "Kyoto",
+        "theme": "temples and culture",
+        "activities": [
+          "Take the bullet train from Tokyo to Kyoto",
+          "Visit Fushimi Inari Shrine in the early morning"
+        ],
+        "logistics": "Stay in Gion neighborhood for scenic views and easy access to temples"
+      },
+      {
+        "day": 4,
+        "city": "Kyoto",
+        "theme": "temples and food",
+        "activities": [
+          "Visit Kinkaku-ji Temple in the late afternoon",
+          "Explore quieter side streets in Gion District in the early morning"
+        ],
+        "logistics": "Use Kyoto City Bus One-day Pass or Subway One-day Pass for convenient travel"
+      },
+      {
+        "day": 5,
+        "city": "Kyoto",
+        "theme": "culture and departure",
+        "activities": [
+          "Visit a local market or shop for souvenirs",
+          "Depart from Kyoto Kansai International Airport or Osaka Itami Airport"
+        ],
+        "logistics": "Use train or bus for airport transfer"
+      }
+    ],
+    "summary": "This 5-day itinerary in Japan focuses on food, temples, and culture, while avoiding crowds by visiting popular sites at less busy times and exploring quieter areas."
+  },
+  "validation_report": {
+    "status": "pass",
+    "issues": [],
+    "suggestions": [],
+    "checks": [
+      {
+        "rule": "duration",
+        "passed": true,
+        "detail": "5 days planned vs 5 requested"
+      },
+      {
+        "rule": "destinations",
+        "passed": true,
+        "detail": "all destinations present"
+      },
+      {
+        "rule": "budget",
+        "passed": true,
+        "detail": "total 1555 USD vs ceiling 3000 USD"
+      },
+      {
+        "rule": "preference:food",
+        "passed": true,
+        "detail": "reflected in itinerary"
+      },
+      {
+        "rule": "preference:temples",
+        "passed": true,
+        "detail": "reflected in itinerary"
+      },
+      {
+        "rule": "constraint:avoid crowds",
+        "passed": true,
+        "detail": "addressed"
+      },
+      {
+        "rule": "preferences",
+        "passed": true,
+        "detail": "Both 'food' and 'temples' preferences are clearly reflected in the itinerary activities and themes (e.g., Tsukiji Fish Market, Meiji Shrine, Fushimi Inari Shrine, Kinkaku-ji Temple, local markets)."
+      },
+      {
+        "rule": "constraints",
+        "passed": true,
+        "detail": "The constraint 'avoid crowds' is addressed by scheduling popular sites for early morning or late afternoon visits (e.g., Tsukiji Fish Market, Fushimi Inari Shrine, Shibuya Crossing, Kinkaku-ji Temple) and by mentioning exploring quieter areas (e.g., Gion District)."
+      }
+    ]
+  },
+  "metadata": {
+    "run_id": "8c3ff70a-b7e4-48a1-9065-7a5157707ffb",
+    "started_at": "2026-06-19T02:49:35.823626Z",
+    "completed_at": "2026-06-19T02:50:36.597902Z",
+    "current_phase": 6,
+    "validation_retry_count": 1,
+    "warnings": [
+      "accommodation: destination_research missing; using trip_spec only (EC-A03)",
+      "transport: accommodation_options missing; planning from trip_spec only (EC-T04)"
+    ],
+    "agent_trace": [
+      {
+        "agent": "request_parser",
+        "phase": 1,
+        "started_at": "2026-06-19T02:49:35.823626Z",
+        "completed_at": "2026-06-19T02:49:38.100851Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "accommodation",
+        "phase": 2,
+        "started_at": "2026-06-19T02:49:38.102905Z",
+        "completed_at": "2026-06-19T02:49:40.101549Z",
+        "success": true,
+        "error": null,
+        "parallel_group": "gather"
+      },
+      {
+        "agent": "destination_research",
+        "phase": 2,
+        "started_at": "2026-06-19T02:49:38.100851Z",
+        "completed_at": "2026-06-19T02:49:40.150126Z",
+        "success": true,
+        "error": null,
+        "parallel_group": "gather"
+      },
+      {
+        "agent": "transport",
+        "phase": 2,
+        "started_at": "2026-06-19T02:49:38.102905Z",
+        "completed_at": "2026-06-19T02:49:40.231825Z",
+        "success": true,
+        "error": null,
+        "parallel_group": "gather"
+      },
+      {
+        "agent": "budget",
+        "phase": 3,
+        "started_at": "2026-06-19T02:49:40.244964Z",
+        "completed_at": "2026-06-19T02:49:54.900164Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "itinerary_composer",
+        "phase": 4,
+        "started_at": "2026-06-19T02:49:54.900164Z",
+        "completed_at": "2026-06-19T02:49:57.450569Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "validator",
+        "phase": 5,
+        "started_at": "2026-06-19T02:49:57.450569Z",
+        "completed_at": "2026-06-19T02:50:10.571200Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "budget",
+        "phase": 6,
+        "started_at": "2026-06-19T02:50:10.571200Z",
+        "completed_at": "2026-06-19T02:50:25.939922Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "itinerary_composer",
+        "phase": 6,
+        "started_at": "2026-06-19T02:50:25.939922Z",
+        "completed_at": "2026-06-19T02:50:27.637802Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "validator",
+        "phase": 5,
+        "started_at": "2026-06-19T02:50:27.637802Z",
+        "completed_at": "2026-06-19T02:50:36.597902Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      }
+    ]
+  }
+}

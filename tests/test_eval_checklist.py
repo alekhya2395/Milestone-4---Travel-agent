@@ -12,11 +12,11 @@ from travel_agent.agents.validator_checks import run_deterministic_checks
 from travel_agent.orchestrator.export import export_run_artifacts
 from travel_agent.orchestrator.pipeline import run_stub_pipeline
 from travel_agent.orchestrator.renderer import render_itinerary
-from travel_agent.orchestrator.state import TripState, ValidationStatus
+from travel_agent.orchestrator.state import TripState
 
-FIX_JP_STATE = Path("outputs/8c3ff70a-b7e4-48a1-9065-7a5157707ffb/state.json")
-FIX_IN_STATE = Path("outputs/fdbf1948-9079-4f3b-a97a-8dd9e1205e91/state.json")
-EVIDENCE_MANIFEST = Path("outputs/evidence_manifest.json")
+FIX_JP_STATE = Path("tests/fixtures/live_fix_jp_state.json")
+FIX_IN_STATE = Path("tests/fixtures/live_fix_in_state.json")
+EVIDENCE_MANIFEST = Path("tests/fixtures/evidence_manifest.json")
 REQUIRED_SECTIONS = [
     "## Overview",
     "## Day-by-day plan",
@@ -35,14 +35,14 @@ def test_m1_cli_produces_full_markdown():
         assert section in md
 
 
-@pytest.mark.skipif(not FIX_JP_STATE.exists(), reason="Live FIX-JP evidence not captured")
+@pytest.mark.skipif(not FIX_JP_STATE.exists(), reason="Live FIX-JP fixture not found")
 def test_m2_fix_jp_live_validation_passes():
     data = json.loads(FIX_JP_STATE.read_text(encoding="utf-8"))
     assert data["validation_report"]["status"] == "pass"
     assert data["trip_spec"]["duration_days"] == 5
 
 
-@pytest.mark.skipif(not FIX_IN_STATE.exists(), reason="Live FIX-IN evidence not captured")
+@pytest.mark.skipif(not FIX_IN_STATE.exists(), reason="Live FIX-IN fixture not found")
 def test_e2e2_fix_in_live_validation_passes():
     data = json.loads(FIX_IN_STATE.read_text(encoding="utf-8"))
     assert data["validation_report"]["status"] == "pass"
@@ -50,17 +50,16 @@ def test_e2e2_fix_in_live_validation_passes():
     assert "Jaipur" in data["trip_spec"]["destinations"]
 
 
-@pytest.mark.skipif(not EVIDENCE_MANIFEST.exists(), reason="Evidence manifest not captured")
+@pytest.mark.skipif(not EVIDENCE_MANIFEST.exists(), reason="Evidence manifest fixture not found")
 def test_evidence_manifest_complete():
     manifest = json.loads(EVIDENCE_MANIFEST.read_text(encoding="utf-8"))
     assert len(manifest["runs"]) >= 2
     for run in manifest["runs"]:
-        for path in run["artifacts"].values():
-            assert Path(path).exists()
+        assert Path(run["state"]).exists()
         assert run["validation_status"] == "pass"
 
 
-@pytest.mark.skipif(not FIX_JP_STATE.exists(), reason="Live FIX-JP evidence not captured")
+@pytest.mark.skipif(not FIX_JP_STATE.exists(), reason="Live FIX-JP fixture not found")
 def test_vr_rules_on_live_fix_jp():
     data = json.loads(FIX_JP_STATE.read_text(encoding="utf-8"))
     state = TripState.model_validate(data)

@@ -1,0 +1,463 @@
+{
+  "raw_request": "Plan a 4-day trip to Rajasthan. Jaipur + Udaipur. 60000 INR budget. Love forts and street food, hate crowds.",
+  "trip_spec": {
+    "duration_days": 4,
+    "destinations": [
+      "Jaipur",
+      "Udaipur"
+    ],
+    "country": "India",
+    "budget_amount": 60000.0,
+    "budget_currency": "INR",
+    "preferences": [
+      "forts",
+      "street food"
+    ],
+    "constraints": [
+      "avoid crowds"
+    ],
+    "travel_style": "mid-range",
+    "party_size": 1,
+    "assumptions": [
+      "party size is 1",
+      "travel style is mid-range"
+    ]
+  },
+  "destination_research": {
+    "cities": [
+      {
+        "city": "Jaipur",
+        "vibe": "Historic and Cultural",
+        "pois": [
+          {
+            "name": "Amber Fort",
+            "category": "Forts",
+            "best_time": "Early morning (estimated: true)",
+            "estimated_duration_hours": 4.0,
+            "estimated": true
+          },
+          {
+            "name": "Hawa Mahal",
+            "category": "Forts",
+            "best_time": "Late afternoon (estimated: true)",
+            "estimated_duration_hours": 2.0,
+            "estimated": true
+          },
+          {
+            "name": "Sethi Bar-Be-Que",
+            "category": "Street Food",
+            "best_time": "Evening (estimated: true)",
+            "estimated_duration_hours": 1.5,
+            "estimated": true
+          }
+        ],
+        "crowd_tips": [
+          "Visit popular attractions early in the morning to avoid crowds",
+          "Explore the city's lesser-known streets and alleys to experience local culture without the crowds"
+        ]
+      },
+      {
+        "city": "Udaipur",
+        "vibe": "Romantic and Scenic",
+        "pois": [
+          {
+            "name": "City Palace",
+            "category": "Forts",
+            "best_time": "Morning (estimated: true)",
+            "estimated_duration_hours": 3.0,
+            "estimated": true
+          },
+          {
+            "name": "Jagdish Temple",
+            "category": "Temples",
+            "best_time": "Late morning (estimated: true)",
+            "estimated_duration_hours": 1.5,
+            "estimated": true
+          },
+          {
+            "name": "Sahelion-ki-Bari",
+            "category": "Gardens",
+            "best_time": "Afternoon (estimated: true)",
+            "estimated_duration_hours": 2.0,
+            "estimated": true
+          },
+          {
+            "name": "Street Food at Bapu Bazaar",
+            "category": "Street Food",
+            "best_time": "Evening (estimated: true)",
+            "estimated_duration_hours": 1.5,
+            "estimated": true
+          }
+        ],
+        "crowd_tips": [
+          "Take a boat ride on Lake Pichola during sunset to avoid crowds",
+          "Explore the city's many gardens and parks to find peaceful spots away from the crowds"
+        ]
+      }
+    ]
+  },
+  "accommodation_options": {
+    "cities": [
+      {
+        "city": "Jaipur",
+        "neighborhoods": [
+          "Bani Park",
+          "C Scheme",
+          "Vaishali Nagar"
+        ],
+        "lodging_tiers": [
+          {
+            "tier": "budget",
+            "example_type": "Guesthouse",
+            "estimated_nightly_min": 800.0,
+            "estimated_nightly_max": 1500.0,
+            "estimated": true
+          },
+          {
+            "tier": "mid-range",
+            "example_type": "Hotel",
+            "estimated_nightly_min": 2500.0,
+            "estimated_nightly_max": 4500.0,
+            "estimated": true
+          },
+          {
+            "tier": "upscale",
+            "example_type": "Luxury Hotel",
+            "estimated_nightly_min": 6000.0,
+            "estimated_nightly_max": 12000.0,
+            "estimated": true
+          }
+        ],
+        "notes": ""
+      },
+      {
+        "city": "Udaipur",
+        "neighborhoods": [
+          "Lake Pichola",
+          "Hathi Pol",
+          "Ambamata"
+        ],
+        "lodging_tiers": [
+          {
+            "tier": "budget",
+            "example_type": "Hostel",
+            "estimated_nightly_min": 600.0,
+            "estimated_nightly_max": 1200.0,
+            "estimated": true
+          },
+          {
+            "tier": "mid-range",
+            "example_type": "Hotel",
+            "estimated_nightly_min": 2000.0,
+            "estimated_nightly_max": 4000.0,
+            "estimated": true
+          },
+          {
+            "tier": "upscale",
+            "example_type": "Luxury Resort",
+            "estimated_nightly_min": 5000.0,
+            "estimated_nightly_max": 10000.0,
+            "estimated": true
+          }
+        ],
+        "notes": ""
+      }
+    ]
+  },
+  "transport_plan": {
+    "inter_city_legs": [
+      {
+        "from_location": "Jaipur",
+        "to_location": "Udaipur",
+        "mode": "Train",
+        "estimated_duration": "6-8 hours",
+        "estimated_cost": 1000.0,
+        "estimated": true,
+        "notes": "Consider booking a rail pass for convenience"
+      }
+    ],
+    "airport_transfers": [
+      {
+        "from_location": "Jaipur Airport",
+        "to_location": "Jaipur City",
+        "mode": "Taxi",
+        "estimated_duration": "30-45 minutes",
+        "estimated_cost": 500.0,
+        "estimated": true,
+        "notes": "Pre-book a taxi for a hassle-free experience"
+      },
+      {
+        "from_location": "Udaipur Airport",
+        "to_location": "Udaipur City",
+        "mode": "Taxi",
+        "estimated_duration": "30-45 minutes",
+        "estimated_cost": 500.0,
+        "estimated": true,
+        "notes": "Pre-book a taxi for a hassle-free experience"
+      }
+    ],
+    "local_transit": [
+      {
+        "city": "Jaipur",
+        "notes": [
+          "Use public buses or auto-rickshaws for local travel",
+          "Consider purchasing a day pass for convenience"
+        ],
+        "pass_suggestions": [
+          "Jaipur City Bus Pass"
+        ]
+      },
+      {
+        "city": "Udaipur",
+        "notes": [
+          "Use public buses or auto-rickshaws for local travel",
+          "Consider purchasing a day pass for convenience"
+        ],
+        "pass_suggestions": [
+          "Udaipur City Bus Pass"
+        ]
+      }
+    ]
+  },
+  "budget_breakdown": {
+    "currency": "INR",
+    "line_items": [
+      {
+        "category": "lodging",
+        "amount": 9750.0,
+        "estimated": true,
+        "notes": "Assumed 3 nights total (4-day trip), split between Jaipur and Udaipur at mid-range average (approx. 3250 INR/night)."
+      },
+      {
+        "category": "transport",
+        "amount": 3600.0,
+        "estimated": true,
+        "notes": "Includes 1000 INR for inter-city train (Jaipur-Udaipur), 1000 INR for two airport transfers (500 INR each), and an estimated 1600 INR for 4 days of local transport (auto-rickshaws/buses at ~400 INR/day)."
+      },
+      {
+        "category": "food",
+        "amount": 7000.0,
+        "estimated": true,
+        "notes": "Estimated 1750 INR per day for 4 days, balancing street food preference with mid-range dining for 1 person."
+      },
+      {
+        "category": "activities",
+        "amount": 2025.0,
+        "estimated": true,
+        "notes": "Includes estimated entry fees for Amber Fort (700 INR), Hawa Mahal (250 INR), City Palace (400 INR), Sahelion-ki-Bari (75 INR), and a Lake Pichola boat ride (600 INR)."
+      },
+      {
+        "category": "buffer",
+        "amount": 3360.0,
+        "estimated": true,
+        "notes": "15% buffer for unforeseen expenses or minor splurges."
+      }
+    ],
+    "total_estimated": 25735.0,
+    "budget_ceiling": 60000.0,
+    "over_budget": false,
+    "tradeoff_suggestions": [
+      "The current estimated costs are significantly below the budget ceiling, offering ample flexibility for the trip.",
+      "Consider upgrading to slightly higher-tier accommodations for a night or two, or opting for more premium experiences like a private car for inter-city travel instead of a train.",
+      "Allocate more budget towards unique cultural workshops, guided tours, or high-quality souvenirs.",
+      "Explore fine dining options for a special meal in Jaipur or Udaipur, or extend the trip by an extra day if feasible within the budget."
+    ]
+  },
+  "draft_itinerary": {
+    "days": [
+      {
+        "day": 1,
+        "city": "Jaipur",
+        "theme": "Forts and History",
+        "activities": [
+          "Visit Amber Fort early in the morning",
+          "Explore the city's lesser-known streets and alleys"
+        ],
+        "logistics": "Use public buses or auto-rickshaws for local travel"
+      },
+      {
+        "day": 2,
+        "city": "Jaipur",
+        "theme": "Street Food and Culture",
+        "activities": [
+          "Visit Hawa Mahal late in the afternoon",
+          "Try street food at Sethi Bar-Be-Que in the evening"
+        ],
+        "logistics": "Consider purchasing a day pass for convenience"
+      },
+      {
+        "day": 3,
+        "city": "Udaipur",
+        "theme": "Romantic and Scenic",
+        "activities": [
+          "Take a train from Jaipur to Udaipur",
+          "Visit City Palace in the morning",
+          "Explore the city's many gardens and parks to find peaceful spots away from the crowds"
+        ],
+        "logistics": "Pre-book a taxi for a hassle-free experience from Udaipur Airport to the city"
+      },
+      {
+        "day": 4,
+        "city": "Udaipur",
+        "theme": "Lake and Gardens",
+        "activities": [
+          "Take a boat ride on Lake Pichola during sunset to avoid crowds",
+          "Visit Sahelion-ki-Bari in the afternoon",
+          "Try street food at Bapu Bazaar in the evening"
+        ],
+        "logistics": "Use public buses or auto-rickshaws for local travel"
+      }
+    ],
+    "summary": "This 4-day itinerary explores the historic city of Jaipur and the romantic city of Udaipur, focusing on forts, street food, and scenic views while avoiding crowds."
+  },
+  "validation_report": {
+    "status": "pass",
+    "issues": [],
+    "suggestions": [],
+    "checks": [
+      {
+        "rule": "duration",
+        "passed": true,
+        "detail": "4 days planned vs 4 requested"
+      },
+      {
+        "rule": "destinations",
+        "passed": true,
+        "detail": "all destinations present"
+      },
+      {
+        "rule": "budget",
+        "passed": true,
+        "detail": "total 25735 INR vs ceiling 60000 INR"
+      },
+      {
+        "rule": "preference:forts",
+        "passed": true,
+        "detail": "reflected in itinerary"
+      },
+      {
+        "rule": "preference:street food",
+        "passed": true,
+        "detail": "reflected in itinerary"
+      },
+      {
+        "rule": "constraint:avoid crowds",
+        "passed": true,
+        "detail": "addressed"
+      },
+      {
+        "rule": "preferences",
+        "passed": true,
+        "detail": "All preferences ('forts', 'street food') are reflected in the itinerary. Forts are covered by Amber Fort and City Palace, and street food is mentioned in Jaipur and Udaipur."
+      },
+      {
+        "rule": "constraints",
+        "passed": true,
+        "detail": "The constraint 'avoid crowds' is addressed multiple times, with suggestions for early morning visits, exploring peaceful spots, and sunset boat rides."
+      }
+    ]
+  },
+  "metadata": {
+    "run_id": "fdbf1948-9079-4f3b-a97a-8dd9e1205e91",
+    "started_at": "2026-06-19T02:53:31.336367Z",
+    "completed_at": "2026-06-19T02:54:34.578977Z",
+    "current_phase": 6,
+    "validation_retry_count": 1,
+    "warnings": [
+      "transport: accommodation_options missing; planning from trip_spec only (EC-T04)",
+      "accommodation: destination_research missing; using trip_spec only (EC-A03)"
+    ],
+    "agent_trace": [
+      {
+        "agent": "request_parser",
+        "phase": 1,
+        "started_at": "2026-06-19T02:53:31.337365Z",
+        "completed_at": "2026-06-19T02:53:32.922485Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "transport",
+        "phase": 2,
+        "started_at": "2026-06-19T02:53:32.924482Z",
+        "completed_at": "2026-06-19T02:53:34.846788Z",
+        "success": true,
+        "error": null,
+        "parallel_group": "gather"
+      },
+      {
+        "agent": "accommodation",
+        "phase": 2,
+        "started_at": "2026-06-19T02:53:32.923482Z",
+        "completed_at": "2026-06-19T02:53:34.915442Z",
+        "success": true,
+        "error": null,
+        "parallel_group": "gather"
+      },
+      {
+        "agent": "destination_research",
+        "phase": 2,
+        "started_at": "2026-06-19T02:53:32.923482Z",
+        "completed_at": "2026-06-19T02:53:35.205796Z",
+        "success": true,
+        "error": null,
+        "parallel_group": "gather"
+      },
+      {
+        "agent": "budget",
+        "phase": 3,
+        "started_at": "2026-06-19T02:53:35.205796Z",
+        "completed_at": "2026-06-19T02:53:51.087852Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "itinerary_composer",
+        "phase": 4,
+        "started_at": "2026-06-19T02:53:51.087852Z",
+        "completed_at": "2026-06-19T02:53:53.048375Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "validator",
+        "phase": 5,
+        "started_at": "2026-06-19T02:53:53.048375Z",
+        "completed_at": "2026-06-19T02:54:07.622149Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "budget",
+        "phase": 6,
+        "started_at": "2026-06-19T02:54:07.622149Z",
+        "completed_at": "2026-06-19T02:54:23.960788Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "itinerary_composer",
+        "phase": 6,
+        "started_at": "2026-06-19T02:54:23.960788Z",
+        "completed_at": "2026-06-19T02:54:25.153831Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      },
+      {
+        "agent": "validator",
+        "phase": 5,
+        "started_at": "2026-06-19T02:54:25.153831Z",
+        "completed_at": "2026-06-19T02:54:34.578977Z",
+        "success": true,
+        "error": null,
+        "parallel_group": null
+      }
+    ]
+  }
+}
