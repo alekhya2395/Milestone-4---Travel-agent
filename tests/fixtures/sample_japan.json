@@ -1,0 +1,22 @@
+{
+  "trip_spec": {
+    "duration_days": 5,
+    "destinations": ["Tokyo", "Kyoto"],
+    "country": "Japan",
+    "budget_amount": 3000,
+    "budget_currency": "USD",
+    "preferences": ["food", "temples"],
+    "constraints": ["avoid crowds"],
+    "travel_style": "mid-range",
+    "party_size": 1,
+    "assumptions": ["Single traveler"]
+  },
+  "validation_report": {
+    "status": "pass",
+    "issues": [],
+    "suggestions": [],
+    "checks": [
+      { "rule": "duration", "passed": true, "detail": "5 days planned" }
+    ]
+  }
+}
