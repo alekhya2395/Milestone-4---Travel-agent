@@ -27,38 +27,112 @@ def _parse_duration(raw: str, default: int = 5) -> int:
     return int(m.group(1)) if m else default
 
 
+# Canonical city names detected in free-form requests (voice + typed).
+KNOWN_CITIES: dict[str, str] = {
+    "tokyo": "Tokyo",
+    "kyoto": "Kyoto",
+    "osaka": "Osaka",
+    "biei": "Biei",
+    "nakasendo": "Nakasendo",
+    "oarai": "Oarai",
+    "hiroshima": "Hiroshima",
+    "nara": "Nara",
+    "sapporo": "Sapporo",
+    "jaipur": "Jaipur",
+    "udaipur": "Udaipur",
+    "delhi": "Delhi",
+    "mumbai": "Mumbai",
+    "agra": "Agra",
+    "goa": "Goa",
+    "barcelona": "Barcelona",
+    "paris": "Paris",
+    "london": "London",
+    "rome": "Rome",
+    "amsterdam": "Amsterdam",
+    "bali": "Bali",
+    "bangkok": "Bangkok",
+    "singapore": "Singapore",
+    "dubai": "Dubai",
+    "new york": "New York",
+    "san francisco": "San Francisco",
+    "los angeles": "Los Angeles",
+}
+
+_CITY_WORD = (
+    r"(?!and\b|or\b|with\b|for\b|the\b|to\b|in\b|of\b|a\b|an\b|"
+    r"love\b|hate\b|street\b|food\b|forts\b|crowds\b|trip\b|plan\b|day\b|days\b)"
+    r"[A-Za-z][A-Za-z\-']+"
+)
+_CITY_TOKEN = rf"{_CITY_WORD}(?:\s+{_CITY_WORD})?"
+
+
+def _planning_slice(raw: str) -> str:
+    """Drop preference/constraint tails so they are not parsed as cities."""
+    match = re.search(r"\b(?:love|hate|budget)\b", raw, re.I)
+    return raw[: match.start()].strip(".") if match else raw
+
+
+def _scan_known_cities(raw: str) -> list[tuple[int, str]]:
+    found: list[tuple[int, str]] = []
+    for key, canonical in KNOWN_CITIES.items():
+        for match in re.finditer(rf"\b{re.escape(key)}\b", raw, re.I):
+            found.append((match.start(), canonical))
+    return found
+
+
+def _dedupe_ordered(found: list[tuple[int, str]]) -> list[str]:
+    found.sort(key=lambda item: item[0])
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for _, name in found:
+        key = name.lower()
+        if key not in seen:
+            seen.add(key)
+            ordered.append(name)
+    return ordered
+
+
 def _parse_destinations(raw: str) -> list[str]:
     """Extract destination cities from free-form trip requests."""
-    known = ("Tokyo", "Kyoto", "Osaka", "Biei", "Nakasendo", "Oarai", "Hiroshima", "Nara", "Sapporo")
-    found: list[tuple[int, str]] = []
-    for name in known:
-        for match in re.finditer(rf"\b{re.escape(name)}\b", raw, re.I):
-            found.append((match.start(), name if name != "Nakasendo" else "Nakasendo"))
+    text = _planning_slice(raw)
+    found: list[tuple[int, str]] = _scan_known_cities(text)
 
     for match in re.finditer(
-        r"\b([A-Z][a-zA-Z\-']+(?:\s+[A-Z][a-zA-Z\-']+)?)\s*\+\s*([A-Z][a-zA-Z\-']+(?:\s+[A-Z][a-zA-Z\-']+)?)\b",
-        raw,
+        rf"\b({_CITY_TOKEN})\s*\+\s*({_CITY_TOKEN})\b",
+        text,
+        re.I,
     ):
         for group in (match.group(1), match.group(2)):
             cleaned = _clean_place_name(group)
             if cleaned:
                 found.append((match.start(), cleaned))
 
-    colon_list = re.search(r":\s*([^.$\n]+)", raw)
+    for match in re.finditer(
+        rf"\b({_CITY_TOKEN})\s+(?:and|&)\s+({_CITY_TOKEN})\b",
+        text,
+        re.I,
+    ):
+        for group in (match.group(1), match.group(2)):
+            cleaned = _clean_place_name(group)
+            if cleaned:
+                found.append((match.start(), cleaned))
+
+    colon_list = re.search(r":\s*([^.$\n]+)", text)
     if colon_list:
         for part in re.split(r"\s*,\s*", colon_list.group(1)):
             cleaned = _clean_place_name(part)
             if cleaned:
-                idx = raw.find(part, colon_list.start())
+                idx = text.find(part, colon_list.start())
                 found.append((idx if idx >= 0 else colon_list.start(), cleaned))
 
     if not found:
+        tail = r"(?:\s*[.,]|$|\s+(?:Love|love|with|budget|for|in|₹|\$|\d))"
         for pattern in (
-            r"(?:weekend|stay|days?\s+)?in\s+([A-Za-z][A-Za-z\s\-']{2,40}?)(?:\s*[.,]|\s+(?:Love|love|with|budget|₹|\$|\d))",
-            r"(?:trip|travel|visit(?:ing)?)\s+(?:to|around)\s+([A-Za-z][A-Za-z\s\-']{2,40}?)(?:\s*[.,]|\s+(?:Love|love|with|budget|₹|\$|\d|Jaipur))",
-            r"Plan\s+(?:a|an)\s+[\w\s\-]*?trip\s+to\s+([A-Za-z][A-Za-z\s\-']{2,40}?)(?:\s*[.,]|\s+(?:Love|love|with|budget|₹|\$|\d))",
+            rf"(?:weekend|stay|days?\s+)?in\s+({_CITY_TOKEN}){tail}",
+            rf"(?:trip|travel|visit(?:ing)?)\s+(?:to|around)\s+({_CITY_TOKEN}){tail}",
+            rf"Plan\s+(?:a|an)\s+[\w\s\-]*?trip\s+to\s+({_CITY_TOKEN}){tail}",
         ):
-            match = re.search(pattern, raw, re.I)
+            match = re.search(pattern, text, re.I)
             if match:
                 cleaned = _clean_place_name(match.group(1))
                 if cleaned:
@@ -66,17 +140,11 @@ def _parse_destinations(raw: str) -> list[str]:
                     break
 
     if found:
-        found.sort(key=lambda item: item[0])
-        seen: set[str] = set()
-        ordered: list[str] = []
-        for _, name in found:
-            key = name.lower()
-            if key not in seen:
-                seen.add(key)
-                ordered.append(name)
-        return ordered
+        return _dedupe_ordered(found)
 
-    if re.search(r"\bJapan\b", raw, re.I):
+    if re.search(r"\b(?:India|Rajasthan)\b", text, re.I):
+        return ["Jaipur", "Udaipur"]
+    if re.search(r"\bJapan\b", text, re.I):
         return ["Tokyo", "Kyoto"]
     return ["Tokyo"]
 
@@ -100,7 +168,8 @@ def _clean_place_name(text: str) -> str | None:
     }
     if name.lower() in skip:
         return None
-    return " ".join(word.capitalize() if word.islower() else word for word in name.split())
+    words = name.split()
+    return " ".join(w.capitalize() if w.islower() else w for w in words)
 
 
 def _parse_country(raw: str) -> str | None:
