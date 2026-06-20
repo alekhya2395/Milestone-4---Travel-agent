@@ -48,4 +48,13 @@ def state_to_api_payload(state: TripState) -> dict:
 
 
 def static_dir() -> Path:
-    return Path(__file__).resolve().parents[3] / "web" / "static"
+    """Locate web/static in dev (repo root) and production (Docker WORKDIR /app)."""
+    candidates = [
+        Path.cwd() / "web" / "static",
+        Path(__file__).resolve().parents[3] / "web" / "static",
+        Path("/app/web/static"),
+    ]
+    for path in candidates:
+        if path.is_dir():
+            return path
+    return candidates[0]

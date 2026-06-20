@@ -1,0 +1,17 @@
+.venv
+venv
+.git
+.github
+__pycache__
+*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+outputs
+tests
+stitch
+docs
+*.md
+!README.md
+.env
+.env.*

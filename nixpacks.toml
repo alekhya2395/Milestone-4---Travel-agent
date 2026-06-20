@@ -1,0 +1,12 @@
+# Fallback if Railway does not use Dockerfile
+[phases.setup]
+nixPkgs = ["python312"]
+
+[phases.install]
+cmds = [
+  "pip install --upgrade pip setuptools wheel",
+  "pip install --no-cache-dir .",
+]
+
+[start]
+cmd = "uvicorn travel_agent.web.app:app --host 0.0.0.0 --port $PORT"
