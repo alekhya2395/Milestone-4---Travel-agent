@@ -28,21 +28,19 @@ html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
-  overflow: hidden;
 }
 
 .app {
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
 }
 
 .glow {
@@ -586,11 +584,11 @@ body {
 }
 
 .view {
-  display: none;
+  display: none !important;
 }
 
 .view.active {
-  display: block;
+  display: block !important;
 }
 
 .card-row {
@@ -604,9 +602,11 @@ body {
   position: relative;
   border-radius: var(--radius);
   overflow: hidden;
+  min-height: 200px;
   aspect-ratio: 16 / 10;
   cursor: pointer;
   border: 1px solid var(--border);
+  background: linear-gradient(145deg, #1a2838 0%, #0f1419 100%);
   transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
 }
 
@@ -728,6 +728,53 @@ body {
 
 #itinerary-summary {
   margin-bottom: 16px;
+}
+
+.markdown-body {
+  color: var(--text-variant);
+  line-height: 1.65;
+  font-size: 0.9rem;
+}
+
+.markdown-body .md-h2 {
+  color: var(--primary);
+  font-size: 1.05rem;
+  margin: 20px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.markdown-body .md-h2:first-child {
+  margin-top: 0;
+}
+
+.markdown-body .md-h3 {
+  color: var(--text);
+  font-size: 0.95rem;
+  margin: 14px 0 8px;
+}
+
+.markdown-body .md-list {
+  margin: 8px 0 12px;
+  padding-left: 20px;
+  color: var(--text-variant);
+}
+
+.markdown-body .md-list li {
+  margin-bottom: 6px;
+}
+
+.markdown-body .md-p {
+  margin: 6px 0;
+  color: var(--text-muted);
+}
+
+.markdown-body strong {
+  color: var(--text);
+}
+
+.day-cards {
+  margin-bottom: 20px;
 }
 
 .empty-state {
@@ -883,11 +930,6 @@ body {
 }
 
 @media (max-width: 768px) {
-  html,
-  body {
-    overflow: hidden;
-  }
-
   .layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;

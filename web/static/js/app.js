@@ -283,6 +283,7 @@
     const el = $("#itinerary-content");
     const days = state.draft_itinerary?.days || [];
     const summaryHtml = renderTripSummaryHtml(state);
+    const md = state.markdown || "";
 
     if (itinerarySummary) {
       if (summaryHtml) {
@@ -293,42 +294,30 @@
       }
     }
 
-    if (!days.length) {
+    if (!days.length && !md) {
       el.className = "panel-content scroll-panel empty-state";
       el.textContent = "Plan a trip to see your day-by-day schedule.";
       return;
     }
 
     el.className = "panel-content scroll-panel";
-    el.innerHTML = days
-      .map(
-        (d) => `
-      <div class="day-card">
-        <h4>Day ${d.day} — ${escapeHtml(d.city)} · ${escapeHtml(d.theme)}</h4>
-        ${d.logistics ? `<p class="day-logistics">${escapeHtml(d.logistics)}</p>` : ""}
-        <ul>${(d.activities || []).map((a) => `<li>${escapeHtml(a)}</li>`).join("")}</ul>
-      </div>`
-      )
-      .join("");
+    const daySection = extractMarkdownSection(md, "Day-by-day plan") || md;
+    el.innerHTML = `
+      ${renderDayCards(days)}
+      <div class="markdown-body">${markdownToHtml(daySection)}</div>
+    `;
   }
 
   function renderAccommodation(state) {
     const el = $("#accommodation-content");
     const cities = state.accommodation_options?.cities || [];
-    if (!cities.length) {
-      el.className = "panel-content empty-state";
-      el.textContent = "Neighborhood and lodging recommendations appear here.";
-      return;
-    }
+    const md = extractMarkdownSection(state.markdown || "", "Where to stay");
 
-    el.className = "panel-content scroll-panel";
-    el.innerHTML = cities
-      .map((c) => {
+    let html = "";
+    if (cities.length) {
+      html += cities.map((c) => {
         const tiers = (c.lodging_tiers || [])
-          .map(
-            (t) =>
-              `<span class="tag">${escapeHtml(t.tier)}: $${t.estimated_nightly_min}–$${t.estimated_nightly_max}/night</span>`
-          )
+          .map((t) => `<span class="tag">${escapeHtml(t.tier)}: $${t.estimated_nightly_min}–$${t.estimated_nightly_max}/night</span>`)
           .join("");
         return `
         <div class="city-block">
@@ -337,81 +326,135 @@
           <div class="tag-list">${tiers}</div>
           ${c.notes ? `<p style="font-size:0.875rem;color:var(--text-variant)">${escapeHtml(c.notes)}</p>` : ""}
         </div>`;
-      })
-      .join("");
+      }).join("");
+    }
+    if (md) html += `<div class="markdown-body">${markdownToHtml(md)}</div>`;
+
+    if (!html) {
+      el.className = "panel-content scroll-panel empty-state";
+      el.textContent = "Neighborhood and lodging recommendations appear here.";
+      return;
+    }
+    el.className = "panel-content scroll-panel";
+    el.innerHTML = html;
   }
 
   function renderTransport(state) {
     const el = $("#transport-content");
     const plan = state.transport_plan;
-    if (!plan) {
-      el.className = "panel-content empty-state";
-      el.textContent = "Inter-city and local transport plans appear here.";
-      return;
-    }
+    const md = extractMarkdownSection(state.markdown || "", "Getting around");
 
-    const legs = [...(plan.inter_city_legs || []), ...(plan.airport_transfers || [])];
-    const local = plan.local_transit || [];
-
-    if (!legs.length && !local.length) {
-      el.className = "panel-content empty-state";
-      el.textContent = "Inter-city and local transport plans appear here.";
-      return;
-    }
-
-    el.className = "panel-content scroll-panel";
-    let html = legs
-      .map(
-        (l) => `
+    let html = "";
+    if (plan) {
+      const legs = [...(plan.inter_city_legs || []), ...(plan.airport_transfers || [])];
+      html += legs.map((l) => `
       <div class="leg-row">
         <div>
           <strong>${escapeHtml(l.from_location)} → ${escapeHtml(l.to_location)}</strong>
           <div style="font-size:0.85rem;color:var(--text-muted)">${escapeHtml(l.mode)} · ${escapeHtml(l.estimated_duration)}</div>
         </div>
         <span class="amount" style="color:var(--secondary)">$${l.estimated_cost}</span>
-      </div>`
-      )
-      .join("");
+      </div>`).join("");
+      (plan.local_transit || []).forEach((n) => {
+        html += `<div class="city-block"><h4>${escapeHtml(n.city)}</h4><ul>${(n.notes || []).map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul></div>`;
+      });
+    }
+    if (md) html += `<div class="markdown-body">${markdownToHtml(md)}</div>`;
 
-    local.forEach((n) => {
-      html += `<div class="city-block"><h4>${escapeHtml(n.city)}</h4><ul>${(n.notes || []).map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul></div>`;
-    });
-
+    if (!html) {
+      el.className = "panel-content scroll-panel empty-state";
+      el.textContent = "Inter-city and local transport plans appear here.";
+      return;
+    }
+    el.className = "panel-content scroll-panel";
     el.innerHTML = html;
   }
 
   function renderBudget(state) {
     const el = $("#budget-content");
     const budget = state.budget_breakdown;
-    if (!budget?.line_items?.length) {
-      el.className = "panel-content empty-state";
-      el.textContent = "Budget breakdown appears here.";
-      return;
-    }
+    const md = extractMarkdownSection(state.markdown || "", "Budget");
 
-    el.className = "panel-content scroll-panel";
-    const lines = budget.line_items
-      .map(
-        (item) => `
+    let html = "";
+    if (budget?.line_items?.length) {
+      const lines = budget.line_items.map((item) => `
       <div class="budget-line">
         <span>${escapeHtml(item.category)}${item.notes ? ` — ${escapeHtml(item.notes)}` : ""}</span>
         <span class="amount">$${item.amount.toLocaleString()}</span>
-      </div>`
-      )
-      .join("");
-
-    el.innerHTML = `
+      </div>`).join("");
+      html = `
       <div class="budget-total">$${budget.total_estimated.toLocaleString()} ${budget.currency || "USD"}</div>
       ${lines}
       ${budget.over_budget ? `<p class="over-budget">Over budget ceiling</p>` : ""}
-      ${(budget.tradeoff_suggestions || []).map((s) => `<p style="font-size:0.85rem;color:var(--text-variant)">• ${escapeHtml(s)}</p>`).join("")}
-    `;
+      ${(budget.tradeoff_suggestions || []).map((s) => `<p style="font-size:0.85rem;color:var(--text-variant)">• ${escapeHtml(s)}</p>`).join("")}`;
+    }
+    if (md) html += `<div class="markdown-body">${markdownToHtml(md)}</div>`;
+
+    if (!html) {
+      el.className = "panel-content scroll-panel empty-state";
+      el.textContent = "Budget breakdown appears here.";
+      return;
+    }
+    el.className = "panel-content scroll-panel";
+    el.innerHTML = html;
   }
 
   function escapeHtml(str) {
     const d = document.createElement("div");
-    d.textContent = str;
+    d.textContent = str == null ? "" : String(str);
     return d.innerHTML;
+  }
+
+  function inlineMarkdown(text) {
+    return String(text).split(/(\*\*.+?\*\*)/g).map((part) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return `<strong>${escapeHtml(part.slice(2, -2))}</strong>`;
+      }
+      return escapeHtml(part);
+    }).join("");
+  }
+
+  function markdownToHtml(md) {
+    if (!md) return "";
+    let html = "";
+    let inList = false;
+    for (const raw of md.split("\n")) {
+      const line = raw.trimEnd();
+      if (line.startsWith("## ")) {
+        if (inList) { html += "</ul>"; inList = false; }
+        html += `<h3 class="md-h2">${inlineMarkdown(line.slice(3))}</h3>`;
+      } else if (line.startsWith("### ")) {
+        if (inList) { html += "</ul>"; inList = false; }
+        html += `<h4 class="md-h3">${inlineMarkdown(line.slice(4))}</h4>`;
+      } else if (line.startsWith("- ")) {
+        if (!inList) { html += '<ul class="md-list">'; inList = true; }
+        html += `<li>${inlineMarkdown(line.slice(2))}</li>`;
+      } else if (line.trim() === "") {
+        if (inList) { html += "</ul>"; inList = false; }
+      } else {
+        if (inList) { html += "</ul>"; inList = false; }
+        html += `<p class="md-p">${inlineMarkdown(line)}</p>`;
+      }
+    }
+    if (inList) html += "</ul>";
+    return html;
+  }
+
+  function extractMarkdownSection(md, title) {
+    if (!md) return "";
+    const re = new RegExp(`## ${title}[\\s\\S]*?(?=\\n## |$)`, "i");
+    const m = md.match(re);
+    return m ? m[0] : "";
+  }
+
+  function renderDayCards(days) {
+    if (!days.length) return "";
+    return `<div class="day-cards">${days.map((d) => `
+      <div class="day-card">
+        <h4>Day ${d.day} — ${escapeHtml(d.city)} · ${escapeHtml(d.theme)}</h4>
+        ${d.logistics ? `<p class="day-logistics">${escapeHtml(d.logistics)}</p>` : ""}
+        <ul>${(d.activities || []).map((a) => `<li>${escapeHtml(a)}</li>`).join("")}</ul>
+      </div>`).join("")}</div>`;
   }
 
   document.querySelectorAll(".nav-item").forEach((btn) => {
