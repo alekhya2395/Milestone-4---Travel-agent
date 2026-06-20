@@ -9,6 +9,8 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from travel_agent.web.paths import static_dir
+
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Tripzy — Travel Multi-Agent Planner", version="0.1.0")
@@ -57,8 +59,6 @@ def plan_trip(body: PlanRequest) -> dict:
 
 
 def _resolve_static_dir() -> Path | None:
-    from travel_agent.web.service import static_dir
-
     path = static_dir()
     return path if path.is_dir() else None
 

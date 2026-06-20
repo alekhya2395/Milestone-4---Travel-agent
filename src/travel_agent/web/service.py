@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from dotenv import load_dotenv
 
 from travel_agent.config import get_settings
@@ -45,16 +43,3 @@ def state_to_api_payload(state: TripState) -> dict:
         state.validation_report.status.value if state.validation_report else None
     )
     return data
-
-
-def static_dir() -> Path:
-    """Locate web/static in dev (repo root) and production (Docker WORKDIR /app)."""
-    candidates = [
-        Path.cwd() / "web" / "static",
-        Path(__file__).resolve().parents[3] / "web" / "static",
-        Path("/app/web/static"),
-    ]
-    for path in candidates:
-        if path.is_dir():
-            return path
-    return candidates[0]
