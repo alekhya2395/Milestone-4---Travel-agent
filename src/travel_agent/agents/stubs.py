@@ -28,15 +28,88 @@ def _parse_duration(raw: str, default: int = 5) -> int:
 
 
 def _parse_destinations(raw: str) -> list[str]:
-    dests: list[str] = []
-    for name in ("Tokyo", "Kyoto", "Osaka", "Biei", "Nakasendo", "Oarai"):
-        if re.search(rf"\b{re.escape(name)}\b", raw, re.I):
-            dests.append(name)
-    if dests:
-        return dests
+    """Extract destination cities from free-form trip requests."""
+    known = ("Tokyo", "Kyoto", "Osaka", "Biei", "Nakasendo", "Oarai", "Hiroshima", "Nara", "Sapporo")
+    found: list[tuple[int, str]] = []
+    for name in known:
+        for match in re.finditer(rf"\b{re.escape(name)}\b", raw, re.I):
+            found.append((match.start(), name if name != "Nakasendo" else "Nakasendo"))
+
+    for match in re.finditer(
+        r"\b([A-Z][a-zA-Z\-']+(?:\s+[A-Z][a-zA-Z\-']+)?)\s*\+\s*([A-Z][a-zA-Z\-']+(?:\s+[A-Z][a-zA-Z\-']+)?)\b",
+        raw,
+    ):
+        for group in (match.group(1), match.group(2)):
+            cleaned = _clean_place_name(group)
+            if cleaned:
+                found.append((match.start(), cleaned))
+
+    colon_list = re.search(r":\s*([^.$\n]+)", raw)
+    if colon_list:
+        for part in re.split(r"\s*,\s*", colon_list.group(1)):
+            cleaned = _clean_place_name(part)
+            if cleaned:
+                idx = raw.find(part, colon_list.start())
+                found.append((idx if idx >= 0 else colon_list.start(), cleaned))
+
+    if not found:
+        for pattern in (
+            r"(?:weekend|stay|days?\s+)?in\s+([A-Za-z][A-Za-z\s\-']{2,40}?)(?:\s*[.,]|\s+(?:Love|love|with|budget|₹|\$|\d))",
+            r"(?:trip|travel|visit(?:ing)?)\s+(?:to|around)\s+([A-Za-z][A-Za-z\s\-']{2,40}?)(?:\s*[.,]|\s+(?:Love|love|with|budget|₹|\$|\d|Jaipur))",
+            r"Plan\s+(?:a|an)\s+[\w\s\-]*?trip\s+to\s+([A-Za-z][A-Za-z\s\-']{2,40}?)(?:\s*[.,]|\s+(?:Love|love|with|budget|₹|\$|\d))",
+        ):
+            match = re.search(pattern, raw, re.I)
+            if match:
+                cleaned = _clean_place_name(match.group(1))
+                if cleaned:
+                    found.append((match.start(), cleaned))
+                    break
+
+    if found:
+        found.sort(key=lambda item: item[0])
+        seen: set[str] = set()
+        ordered: list[str] = []
+        for _, name in found:
+            key = name.lower()
+            if key not in seen:
+                seen.add(key)
+                ordered.append(name)
+        return ordered
+
     if re.search(r"\bJapan\b", raw, re.I):
         return ["Tokyo", "Kyoto"]
     return ["Tokyo"]
+
+
+def _clean_place_name(text: str) -> str | None:
+    name = text.strip().strip(".")
+    name = re.sub(
+        r"\s+(Japan|India|France|Spain|Italy|Thailand|USA|UK|Hokkaido|Rajasthan|Culture|Nature)\b.*$",
+        "",
+        name,
+        flags=re.I,
+    )
+    name = re.sub(r"^(?:the\s+|a\s+|an\s+)", "", name, flags=re.I)
+    name = re.sub(r"\s+(Trail|Region|Province|State)$", "", name, flags=re.I)
+    name = name.strip()
+    if not name or len(name) < 3:
+        return None
+    skip = {
+        "plan", "day", "days", "trip", "budget", "weekend", "hiking", "hike",
+        "love", "hate", "food", "total", "only", "focused", "trail", "on",
+    }
+    if name.lower() in skip:
+        return None
+    return " ".join(word.capitalize() if word.islower() else word for word in name.split())
+
+
+def _parse_country(raw: str) -> str | None:
+    if "₹" in raw or re.search(r"\bIndia\b|\bRajasthan\b", raw, re.I):
+        return "India"
+    for country in ("Japan", "France", "Spain", "Italy", "Thailand", "USA", "UK", "Germany", "Portugal"):
+        if re.search(rf"\b{country}\b", raw, re.I):
+            return country
+    return None
 
 
 def _parse_budget(raw: str) -> float | None:
@@ -63,6 +136,8 @@ def _parse_preferences(raw: str) -> list[str]:
         "shopping",
         "anime",
         "onsen",
+        "architecture",
+        "forts",
     ):
         if keyword in lower:
             prefs.append(keyword)
@@ -164,17 +239,162 @@ DESTINATION_PROFILES: dict[str, dict] = {
 
 _DEFAULT_PROFILE = DESTINATION_PROFILES["Tokyo"]
 
+_MAJOR_JP_CITIES = frozenset({"Tokyo", "Kyoto", "Osaka", "Hiroshima", "Nara", "Sapporo", "Fukuoka", "Nagoya"})
 
-def _profile_for(city: str) -> dict:
-    return DESTINATION_PROFILES.get(city, _DEFAULT_PROFILE)
+_PLACE_TYPE_HINTS: dict[str, tuple[str, ...]] = {
+    "hiking": ("hik", "trail", "trek", "mountain", "nakasendo"),
+    "coastal": ("beach", "coast", "sea", "island", "ocean", "harbor", "harbour", "surf"),
+    "nature": ("nature", "photography", "national park", "wildlife", "scenic", "countryside"),
+    "foodie": ("food", "street food", "cuisine", "restaurant", "market"),
+    "cultural": ("temple", "fort", "museum", "architecture", "heritage", "history", "culture"),
+}
+
+
+def _infer_place_type(city: str, preferences: list[str], raw: str) -> str:
+    blob = f"{city} {raw} {' '.join(preferences)}".lower()
+    for place_type, hints in _PLACE_TYPE_HINTS.items():
+        if any(hint in blob for hint in hints):
+            return place_type
+    return "urban"
+
+
+def _format_template(value: str, city: str) -> str:
+    return value.format(city=city)
+
+
+def _build_dynamic_profile(city: str, preferences: list[str], raw: str) -> dict:
+    place_type = _infer_place_type(city, preferences, raw)
+    pref_text = ", ".join(preferences[:3])
+
+    if place_type == "hiking":
+        focus = f"trails, viewpoints, and outdoor time around {city}"
+        vibe = f"{city} — forest paths, scenic overlooks, and fresh-air day hikes"
+        crowd_tips = [f"Start early to beat crowds on popular {city} trails", "Pack layers and trail snacks"]
+        neighborhoods = [f"{city} trailhead area", f"{city} town center", "Near main station"]
+        lodging_notes = f"Book lodging in {city} town center or near the trailhead — transport can be limited."
+        local_transit = ["Local bus to trailheads", "Walking between town sites"]
+        activity_cost_note = f"Trail fees, guides, and gear rental near {city}"
+        day_templates = [
+            ("Arrival & orientation", [f"Arrive in {city} and check in", f"Short walk around {city} center", f"Trail briefing and supply stop"]),
+            ("Main hike day", [f"Morning hike on the signature {city} trail", "Scenic lunch stop en route", f"Evening rest in {city}"]),
+            ("Landmarks & views", [f"Viewpoint or heritage stop near {city}", f"Local museum or visitor center", "Relaxed dinner downtown"]),
+            ("Nature loop", [f"Second trail or nature walk around {city}", "Photography stops and cafés", "Optional onsen or spa"]),
+            ("Departure day", [f"Easy morning stroll in {city}", "Souvenir stop", "Transit to airport or next city"]),
+        ]
+    elif place_type == "coastal":
+        focus = f"coastline walks, seafood, and seaside views in {city}"
+        vibe = f"{city} — ocean air, waterfront promenades, and fresh local seafood"
+        crowd_tips = [f"Visit {city} waterfront at sunrise", "Book seafood restaurants ahead on weekends"]
+        neighborhoods = [f"{city} waterfront", f"{city} old port", "Near beach access"]
+        lodging_notes = f"Stay walkable to the coast in {city} for sunrise and sunset walks."
+        local_transit = ["Walk the coastal promenade", "Local bus along the shore"]
+        activity_cost_note = f"Seafood meals and boat tours in {city}"
+        day_templates = [
+            ("Coast & arrival", [f"Check in and explore {city} waterfront", f"Coastal promenade walk", f"Seafood dinner in {city}"]),
+            ("Beach & culture", [f"Morning beach or cove near {city}", f"Local shrine, fort, or old town in {city}", "Sunset by the water"]),
+            ("Markets & day trip", [f"{city} fish or farmers market", f"Nearby coastal viewpoint", "Casual harbor-side lunch"]),
+            ("Departure day", [f"Final swim or coastal walk in {city}", "Pack and depart"]),
+        ]
+    elif place_type == "nature":
+        focus = f"landscapes, viewpoints, and slow travel around {city}"
+        vibe = f"{city} — open skies, scenic drives, and camera-friendly viewpoints"
+        crowd_tips = [f"Check weather for {city} viewpoints", "Rent a car if public transit is sparse"]
+        neighborhoods = [f"{city} town center", "Near scenic road access", "Countryside lodge area"]
+        lodging_notes = f"Choose a lodge or guesthouse outside {city} center for the best scenery."
+        local_transit = ["Rental car recommended", "Seasonal tourist shuttle"]
+        activity_cost_note = f"Car rental, farm stops, and park entries near {city}"
+        day_templates = [
+            ("Scenic arrival", [f"Arrive in {city} and pick up rental car", f"First viewpoint loop around {city}", "Local farm café stop"]),
+            ("Signature landscape", [f"Sunrise shoot at a famous {city} viewpoint", "Scenic drive and short walks", "Quiet dinner locally"]),
+            ("Countryside day", [f"Explore rural roads near {city}", "Seasonal fields or lake stop", "Return via local specialty food"]),
+            ("Departure day", [f"One last {city} lookout", "Return rental and depart"]),
+        ]
+    elif place_type == "foodie":
+        focus = f"local markets, signature dishes, and food neighborhoods in {city}"
+        vibe = f"{city} — market mornings, regional specialties, and neighborhood food crawls"
+        crowd_tips = [f"Book popular {city} restaurants early", "Visit markets before noon for best selection"]
+        neighborhoods = [f"{city} food market district", f"{city} old town", "Near central station"]
+        lodging_notes = f"Stay central in {city} so food markets and restaurants are walkable."
+        local_transit = ["Walk between food districts", "Metro or local bus day pass"]
+        activity_cost_note = f"Market tastings and restaurant meals in {city}"
+        day_templates = [
+            ("Market & arrival", [f"Check in and explore {city} central market", f"Signature street-food tasting in {city}", "Evening food alley crawl"]),
+            ("Local cuisine deep dive", [f"Cooking class or food tour in {city}", f"Historic quarter walk between meals", "Reservation-only local favorite dinner"]),
+            ("Neighborhood flavors", [f"Breakfast specialty unique to {city}", f"Café and specialty shop hop", "Progressive dinner across two districts"]),
+            ("Culture between meals", [f"Light sightseeing in {city}", f"Final market stop for souvenirs", "Departure meal at a classic spot"]),
+            ("Departure day", [f"One must-try breakfast in {city}", "Pack and transit out"]),
+        ]
+    elif place_type == "cultural":
+        focus = f"heritage sites, museums, and historic neighborhoods in {city}"
+        vibe = f"{city} — temples, forts, museums, and old-quarter wandering"
+        crowd_tips = [f"Visit major {city} sites at opening time", "Book timed-entry tickets online when available"]
+        neighborhoods = [f"{city} historic center", f"{city} museum district", "Near old town"]
+        lodging_notes = f"Stay in or near {city}'s historic core for easy walking access."
+        local_transit = ["Walk the old town", "Metro or heritage tram where available"]
+        activity_cost_note = f"Museum entries and guided heritage tours in {city}"
+        day_templates = [
+            ("Heritage introduction", [f"Arrive and walk {city} old town", f"Main palace, fort, or temple in {city}", "Evening cultural quarter stroll"]),
+            ("Museums & history", [f"Top museum day in {city}", f"Historic neighborhood wandering", "Traditional performance or local craft shop"]),
+            ("Architecture day", [f"Iconic buildings and viewpoints in {city}", f"Guided heritage walk", "Local specialty dinner"]),
+            ("Day trip option", [f"Nearby heritage site from {city}", "Return for sunset in the old center", "Night market or plaza"]),
+            ("Departure day", [f"Final temple or monument in {city}", "Souvenir shopping", "Departure transfer"]),
+        ]
+    else:
+        focus = f"landmarks, neighborhoods, and local life in {city}"
+        vibe = f"{city} — classic sights mixed with cafés, shops, and local neighborhoods"
+        crowd_tips = [f"Use a transit pass to cross {city} efficiently", f"Explore one {city} neighborhood deeply per day"]
+        neighborhoods = [f"{city} city center", f"{city} old town", "Near main station"]
+        lodging_notes = f"Pick a central base in {city} with good transit links."
+        local_transit = ["City transit day pass", "Walkable central districts"]
+        activity_cost_note = f"Sights, museums, and experiences in {city}"
+        day_templates = [
+            ("Arrival & center", [f"Check in and explore downtown {city}", f"Main square or waterfront in {city}", "Welcome dinner nearby"]),
+            ("Highlights day", [f"Top landmark or museum in {city}", f"Historic district walk", "Evening in a lively neighborhood"]),
+            ("Local neighborhoods", [f"Café and shopping streets in {city}", f"Park or viewpoint", "Try a regional specialty dish"]),
+            ("Flexible explorer day", [f"Day trip or lesser-known district near {city}", "Local market stop", "Relaxed final dinner"]),
+            ("Departure day", [f"Easy morning in {city}", "Last-minute souvenirs", "Airport or station transfer"]),
+        ]
+
+    days = [
+        (theme, [_format_template(activity, city) for activity in activities])
+        for theme, activities in day_templates
+    ]
+
+    return {
+        "focus": focus if pref_text == "culture" else f"{focus}; emphasis on {pref_text}",
+        "vibe": vibe,
+        "crowd_tips": crowd_tips,
+        "neighborhoods": neighborhoods,
+        "lodging_notes": lodging_notes,
+        "local_transit": local_transit,
+        "activity_cost_note": activity_cost_note,
+        "days": days,
+        "place_type": place_type,
+    }
+
+
+def _profile_for(
+    city: str,
+    preferences: list[str] | None = None,
+    raw: str = "",
+) -> dict:
+    if city in DESTINATION_PROFILES:
+        return DESTINATION_PROFILES[city]
+    return _build_dynamic_profile(city, preferences or ["culture"], raw)
 
 
 def _primary_city(cities: list[str]) -> str:
     return cities[0] if cities else "Tokyo"
 
 
-def _day_plan(city: str, day_num: int, duration: int) -> tuple[str, list[str], str]:
-    profile = _profile_for(city)
+def _day_plan(
+    city: str,
+    day_num: int,
+    duration: int,
+    preferences: list[str] | None = None,
+    raw: str = "",
+) -> tuple[str, list[str], str]:
+    profile = _profile_for(city, preferences, raw)
     templates = profile["days"]
     if day_num <= len(templates):
         theme, activities = templates[day_num - 1]
@@ -189,9 +409,17 @@ def _day_plan(city: str, day_num: int, duration: int) -> tuple[str, list[str], s
     return last_theme, last_activities, profile["local_transit"][0]
 
 
-def _summary_for(cities: list[str], duration: int, preferences: list[str]) -> str:
+def _stub_context(state: TripState) -> tuple[list[str], list[str], str]:
+    spec = state.trip_spec
+    cities = spec.destinations if spec else ["Tokyo"]
+    preferences = spec.preferences if spec and spec.preferences else ["culture"]
+    raw = state.raw_request or ""
+    return cities, preferences, raw
+
+
+def _summary_for(cities: list[str], duration: int, preferences: list[str], raw: str = "") -> str:
     primary = _primary_city(cities)
-    profile = _profile_for(primary)
+    profile = _profile_for(primary, preferences, raw)
     pref_text = ", ".join(preferences[:3]) if preferences else "local highlights"
     if len(cities) == 1:
         return (
@@ -221,9 +449,9 @@ class RequestParserStub:
         state.trip_spec = TripSpec(
             duration_days=_parse_duration(raw),
             destinations=_parse_destinations(raw),
-            country="Japan" if re.search(r"Japan", raw, re.I) else None,
+            country=_parse_country(raw) or ("Japan" if re.search(r"Japan", raw, re.I) else None),
             budget_amount=_parse_budget(raw),
-            budget_currency="USD",
+            budget_currency="USD" if "$" in raw else ("INR" if "₹" in raw else "USD"),
             preferences=_parse_preferences(raw),
             constraints=["avoid crowds"] if "crowd" in raw.lower() else [],
             assumptions=["Demo stub — no LLM calls"],
@@ -235,13 +463,13 @@ class DestinationResearchStub:
     name = "destination_research"
 
     def run(self, state: TripState, context: AgentContext) -> TripState:
-        cities = state.trip_spec.destinations if state.trip_spec else ["Tokyo"]
+        cities, preferences, raw = _stub_context(state)
         state.destination_research = DestinationResearch(
             cities=[
                 CityResearch(
                     city=c,
-                    vibe=_profile_for(c)["vibe"],
-                    crowd_tips=_profile_for(c)["crowd_tips"],
+                    vibe=_profile_for(c, preferences, raw)["vibe"],
+                    crowd_tips=_profile_for(c, preferences, raw)["crowd_tips"],
                 )
                 for c in cities
             ]
@@ -253,12 +481,12 @@ class AccommodationStub:
     name = "accommodation"
 
     def run(self, state: TripState, context: AgentContext) -> TripState:
-        cities = state.trip_spec.destinations if state.trip_spec else ["Tokyo"]
+        cities, preferences, raw = _stub_context(state)
         state.accommodation_options = AccommodationOptions(
             cities=[
                 CityAccommodation(
                     city=c,
-                    neighborhoods=_profile_for(c)["neighborhoods"],
+                    neighborhoods=_profile_for(c, preferences, raw)["neighborhoods"],
                     lodging_tiers=[
                         LodgingTier(
                             tier="mid-range",
@@ -267,7 +495,7 @@ class AccommodationStub:
                             estimated_nightly_max=160,
                         )
                     ],
-                    notes=_profile_for(c)["lodging_notes"],
+                    notes=_profile_for(c, preferences, raw)["lodging_notes"],
                 )
                 for c in cities
             ]
@@ -279,30 +507,31 @@ class TransportStub:
     name = "transport"
 
     def run(self, state: TripState, context: AgentContext) -> TripState:
-        cities = state.trip_spec.destinations if state.trip_spec else ["Tokyo", "Kyoto"]
+        cities, preferences, raw = _stub_context(state)
+        country = state.trip_spec.country if state.trip_spec else None
         legs: list[TransportLeg] = []
         for i in range(len(cities) - 1):
-            mode = (
-                "Shinkansen (bullet train)"
-                if cities[i] in ("Tokyo", "Kyoto", "Osaka")
-                and cities[i + 1] in ("Tokyo", "Kyoto", "Osaka")
-                else "Limited express train or bus"
+            shinkansen_ok = (
+                country == "Japan"
+                and cities[i] in _MAJOR_JP_CITIES
+                and cities[i + 1] in _MAJOR_JP_CITIES
             )
+            mode = "Shinkansen (bullet train)" if shinkansen_ok else "Train or regional bus"
             legs.append(
                 TransportLeg(
                     from_location=cities[i],
                     to_location=cities[i + 1],
                     mode=mode,
-                    estimated_duration="2–3 hours" if "Shinkansen" in mode else "3–5 hours",
-                    estimated_cost=120.0 if "Shinkansen" in mode else 65.0,
+                    estimated_duration="2–3 hours" if shinkansen_ok else "3–6 hours",
+                    estimated_cost=120.0 if shinkansen_ok else 65.0,
                     notes="Reserve seats in advance during peak season",
                 )
             )
-        airport_mode = (
-            "Rental car pickup"
-            if _primary_city(cities) in ("Biei", "Nakasendo")
-            else "Airport express / train"
+        primary_profile = _profile_for(_primary_city(cities), preferences, raw)
+        needs_car = primary_profile.get("place_type") in ("nature", "hiking") or any(
+            "Rental car" in note for note in primary_profile["local_transit"]
         )
+        airport_mode = "Rental car pickup" if needs_car else "Airport express / train"
         state.transport_plan = TransportPlan(
             inter_city_legs=legs,
             airport_transfers=[
@@ -311,11 +540,11 @@ class TransportStub:
                     to_location=cities[0],
                     mode=airport_mode,
                     estimated_duration="45–90 min",
-                    estimated_cost=35.0 if airport_mode.startswith("Rental") else 25.0,
+                    estimated_cost=35.0 if needs_car else 25.0,
                 )
             ],
             local_transit=[
-                LocalTransitNote(city=c, notes=_profile_for(c)["local_transit"])
+                LocalTransitNote(city=c, notes=_profile_for(c, preferences, raw)["local_transit"])
                 for c in cities
             ],
         )
@@ -327,13 +556,13 @@ class BudgetStub:
 
     def run(self, state: TripState, context: AgentContext) -> TripState:
         spec = state.trip_spec
+        cities, preferences, raw = _stub_context(state)
         ceiling = spec.budget_amount if spec else 3000.0
         days = spec.duration_days if spec else 5
-        cities = spec.destinations if spec else ["Tokyo"]
         primary = _primary_city(cities)
-        profile = _profile_for(primary)
+        profile = _profile_for(primary, preferences, raw)
         lodging = days * 120
-        transport = 220.0 if primary in ("Biei", "Nakasendo") else 180.0
+        transport = 220.0 if profile.get("place_type") in ("nature", "hiking") else 180.0
         food = days * 55
         activities = days * 40
         buffer = 150.0
@@ -364,14 +593,13 @@ class ItineraryComposerStub:
     def run(self, state: TripState, context: AgentContext) -> TripState:
         spec = state.trip_spec
         duration = spec.duration_days if spec else 5
-        cities = spec.destinations if spec else ["Tokyo"]
-        preferences = spec.preferences if spec else ["culture"]
+        cities, preferences, raw = _stub_context(state)
         city_schedule = _distribute_cities(cities, duration)
 
         days: list[ItineraryDay] = []
         for d in range(1, duration + 1):
             city = city_schedule[d - 1]
-            theme, activities, logistics = _day_plan(city, d, duration)
+            theme, activities, logistics = _day_plan(city, d, duration, preferences, raw)
             days.append(
                 ItineraryDay(
                     day=d,
@@ -382,7 +610,7 @@ class ItineraryComposerStub:
                 )
             )
         state.draft_itinerary = DraftItinerary(
-            summary=_summary_for(cities, duration, preferences),
+            summary=_summary_for(cities, duration, preferences, raw),
             days=days,
         )
         return state
