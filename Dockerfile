@@ -14,7 +14,8 @@ RUN pip install --upgrade pip setuptools wheel \
     && pip install --no-cache-dir .
 
 COPY web ./web
+COPY start.py ./start.py
 
 EXPOSE 8080
 
-CMD ["python", "-m", "travel_agent.web.server"]
+CMD ["python", "start.py"]

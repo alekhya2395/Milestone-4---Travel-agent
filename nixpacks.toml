@@ -1,12 +1,2 @@
-# Fallback if Railway does not use Dockerfile
-[phases.setup]
-nixPkgs = ["python312"]
-
-[phases.install]
-cmds = [
-  "pip install --upgrade pip setuptools wheel",
-  "pip install --no-cache-dir .",
-]
-
 [start]
-cmd = "python -m travel_agent.web.server"
+cmd = "python start.py"

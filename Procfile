@@ -1,1 +1,1 @@
-web: python -m travel_agent.web.server
+web: python start.py
