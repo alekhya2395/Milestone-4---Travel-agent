@@ -90,9 +90,9 @@
       </aside>
 
       <main class="main">
-        <section id="view-overview" class="view active">
-          <div class="plan-banner hidden" id="plan-status"></div>
+        <div class="plan-banner hidden" id="plan-status"></div>
 
+        <section id="view-overview" class="view active">
           <h2 class="section-title">Explore</h2>
           <div class="card-row" id="explore-cards">
             <article class="dest-card" data-prompt="Plan a 5-day trip to Japan. Tokyo. $3,000 budget. Love food and temples, hate crowds.">
@@ -202,22 +202,23 @@
 
         <section id="view-itinerary" class="view">
           <h2 class="section-title">Itinerary</h2>
-          <div id="itinerary-content" class="panel-content empty-state">Plan a trip to see your day-by-day schedule.</div>
+          <div class="trip-summary hidden" id="itinerary-summary"></div>
+          <div id="itinerary-content" class="panel-content scroll-panel empty-state">Plan a trip to see your day-by-day schedule.</div>
         </section>
 
         <section id="view-accommodation" class="view">
           <h2 class="section-title">Accommodation</h2>
-          <div id="accommodation-content" class="panel-content empty-state">Neighborhood and lodging recommendations appear here.</div>
+          <div id="accommodation-content" class="panel-content scroll-panel empty-state">Neighborhood and lodging recommendations appear here.</div>
         </section>
 
         <section id="view-transport" class="view">
           <h2 class="section-title">Transport</h2>
-          <div id="transport-content" class="panel-content empty-state">Inter-city and local transport plans appear here.</div>
+          <div id="transport-content" class="panel-content scroll-panel empty-state">Inter-city and local transport plans appear here.</div>
         </section>
 
         <section id="view-budget" class="view">
           <h2 class="section-title">Budget</h2>
-          <div id="budget-content" class="panel-content empty-state">Budget breakdown appears here.</div>
+          <div id="budget-content" class="panel-content scroll-panel empty-state">Budget breakdown appears here.</div>
         </section>
       </main>
     </div>

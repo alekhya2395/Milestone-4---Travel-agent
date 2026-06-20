@@ -24,6 +24,8 @@
   const loadingText = $("#loading-text");
   const planStatus = $("#plan-status");
   const tripSummary = $("#trip-summary");
+  const itinerarySummary = $("#itinerary-summary");
+  const mainEl = $(".main");
   const transcript = $("#transcript");
   const tripAiHint = $("#trip-ai-hint");
   const agentProgress = $("#agent-progress");
@@ -133,6 +135,9 @@
     document.querySelectorAll(".view").forEach((sec) => {
       sec.classList.toggle("active", sec.id === `view-${view}`);
     });
+    if (mainEl) {
+      mainEl.scrollTop = 0;
+    }
   }
 
   function showLoading(msg) {
@@ -179,7 +184,7 @@
 
     planning = true;
     tripRequest.value = text;
-    openPanel();
+    closePanelFn();
     showLoading();
     resetAgentProgress();
     readSummaryBtn.classList.add("hidden");
@@ -241,15 +246,11 @@
     renderBudget(state);
   }
 
-  function renderOverview(state) {
+  function renderTripSummaryHtml(state) {
     const spec = state.trip_spec;
     const draft = state.draft_itinerary;
-    if (!spec && !draft) {
-      tripSummary.classList.add("hidden");
-      return;
-    }
+    if (!spec && !draft) return null;
 
-    tripSummary.classList.remove("hidden");
     const dests = spec?.destinations?.join(" → ") || "—";
     const days = spec?.duration_days || draft?.days?.length || "—";
     const budget = spec?.budget_amount
@@ -257,7 +258,7 @@
       : "—";
     const summary = draft?.summary || "";
 
-    tripSummary.innerHTML = `
+    return `
       <h3>${escapeHtml(dests)}</h3>
       <p><strong>${days} days</strong> · Budget ${escapeHtml(String(budget))}</p>
       ${summary ? `<p style="margin-top:12px">${escapeHtml(summary)}</p>` : ""}
@@ -267,23 +268,45 @@
     `;
   }
 
+  function renderOverview(state) {
+    const html = renderTripSummaryHtml(state);
+    if (!html) {
+      tripSummary.classList.add("hidden");
+      return;
+    }
+
+    tripSummary.classList.remove("hidden");
+    tripSummary.innerHTML = html;
+  }
+
   function renderItinerary(state) {
     const el = $("#itinerary-content");
     const days = state.draft_itinerary?.days || [];
+    const summaryHtml = renderTripSummaryHtml(state);
+
+    if (itinerarySummary) {
+      if (summaryHtml) {
+        itinerarySummary.classList.remove("hidden");
+        itinerarySummary.innerHTML = summaryHtml;
+      } else {
+        itinerarySummary.classList.add("hidden");
+      }
+    }
+
     if (!days.length) {
-      el.className = "panel-content empty-state";
+      el.className = "panel-content scroll-panel empty-state";
       el.textContent = "Plan a trip to see your day-by-day schedule.";
       return;
     }
 
-    el.className = "panel-content";
+    el.className = "panel-content scroll-panel";
     el.innerHTML = days
       .map(
         (d) => `
       <div class="day-card">
         <h4>Day ${d.day} — ${escapeHtml(d.city)} · ${escapeHtml(d.theme)}</h4>
-        ${d.logistics ? `<p style="margin:0 0 8px;font-size:0.85rem;color:var(--text-muted)">${escapeHtml(d.logistics)}</p>` : ""}
-        <ul>${d.activities.map((a) => `<li>${escapeHtml(a)}</li>`).join("")}</ul>
+        ${d.logistics ? `<p class="day-logistics">${escapeHtml(d.logistics)}</p>` : ""}
+        <ul>${(d.activities || []).map((a) => `<li>${escapeHtml(a)}</li>`).join("")}</ul>
       </div>`
       )
       .join("");
@@ -298,7 +321,7 @@
       return;
     }
 
-    el.className = "panel-content";
+    el.className = "panel-content scroll-panel";
     el.innerHTML = cities
       .map((c) => {
         const tiers = (c.lodging_tiers || [])
@@ -336,7 +359,7 @@
       return;
     }
 
-    el.className = "panel-content";
+    el.className = "panel-content scroll-panel";
     let html = legs
       .map(
         (l) => `
@@ -366,7 +389,7 @@
       return;
     }
 
-    el.className = "panel-content";
+    el.className = "panel-content scroll-panel";
     const lines = budget.line_items
       .map(
         (item) => `
@@ -392,7 +415,10 @@
   }
 
   document.querySelectorAll(".nav-item").forEach((btn) => {
-    btn.addEventListener("click", () => switchView(btn.dataset.view));
+    btn.addEventListener("click", () => {
+      closePanelFn();
+      switchView(btn.dataset.view);
+    });
   });
 
   document.querySelectorAll(".dest-card").forEach((card) => {

@@ -33,12 +33,16 @@ body {
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  overflow: hidden;
 }
 
 .app {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .glow {
@@ -78,6 +82,7 @@ body {
   border-bottom: 1px solid var(--border);
   background: rgba(16, 19, 26, 0.9);
   backdrop-filter: blur(12px);
+  flex-shrink: 0;
 }
 
 .brand {
@@ -164,7 +169,9 @@ body {
   z-index: 1;
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
-  min-height: calc(100vh - 61px);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ── Sidebar ── */
@@ -176,6 +183,8 @@ body {
   flex-direction: column;
   gap: 20px;
   position: relative;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .auth-buttons {
@@ -362,6 +371,8 @@ body {
   left: 18px;
   z-index: 101;
   width: min(400px, calc(var(--sidebar-w) + 140px));
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
   background: rgba(26, 29, 36, 0.98);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(87, 241, 219, 0.3);
@@ -542,8 +553,29 @@ body {
 
 /* ── Main content ── */
 .main {
-  padding: 32px 40px 48px;
+  padding: 24px 40px 32px;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.plan-banner {
+  background: rgba(87, 241, 219, 0.08);
+  border: 1px solid rgba(87, 241, 219, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 0.875rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  backdrop-filter: blur(8px);
+}
+
+.plan-banner.error {
+  background: rgba(255, 180, 171, 0.08);
+  border-color: rgba(255, 180, 171, 0.3);
 }
 
 .section-title {
@@ -639,20 +671,6 @@ body {
   color: var(--secondary);
 }
 
-.plan-banner {
-  background: rgba(87, 241, 219, 0.08);
-  border: 1px solid rgba(87, 241, 219, 0.25);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  margin-bottom: 24px;
-  font-size: 0.875rem;
-}
-
-.plan-banner.error {
-  background: rgba(255, 180, 171, 0.08);
-  border-color: rgba(255, 180, 171, 0.3);
-}
-
 .hidden {
   display: none !important;
 }
@@ -681,7 +699,35 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px;
-  min-height: 200px;
+  min-height: 120px;
+}
+
+.panel-content.scroll-panel {
+  padding-bottom: 32px;
+}
+
+.day-card:last-child {
+  margin-bottom: 0;
+}
+
+.day-card ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--text-variant);
+  line-height: 1.65;
+  word-break: break-word;
+}
+
+.day-card li {
+  margin-bottom: 6px;
+}
+
+.day-card li:last-child {
+  margin-bottom: 0;
+}
+
+#itinerary-summary {
+  margin-bottom: 16px;
 }
 
 .empty-state {
@@ -701,6 +747,13 @@ body {
   margin: 0 0 8px;
   color: var(--primary);
   font-size: 0.95rem;
+}
+
+.day-logistics {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 .day-card ul {
@@ -837,8 +890,14 @@ body {
 }
 
 @media (max-width: 768px) {
+  html,
+  body {
+    overflow: hidden;
+  }
+
   .layout {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
   }
 
   .sidebar {
