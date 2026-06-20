@@ -14,7 +14,9 @@ RUN pip install --upgrade pip setuptools wheel \
     && pip install --no-cache-dir .
 
 COPY web ./web
+COPY scripts/start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD ["sh", "-c", "uvicorn travel_agent.web.app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["/app/start.sh"]

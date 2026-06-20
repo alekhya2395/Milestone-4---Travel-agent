@@ -31,7 +31,7 @@ def test_plan_stub():
 def test_plan_empty_rejected():
     client = TestClient(app)
     res = client.post("/api/plan", json={"request": "   ", "stub": True})
-    assert res.status_code == 422
+    assert res.status_code == 400
 
 
 def test_static_index():
