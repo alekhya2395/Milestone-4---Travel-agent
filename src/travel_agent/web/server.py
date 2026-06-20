@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import logging
 import os
 
 import uvicorn
 
+logger = logging.getLogger(__name__)
+
 
 def main() -> None:
-    port = int(os.environ.get("PORT", "8000"))
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    port = int(os.environ.get("PORT", "8080"))
+    logger.info("Starting Tripzy on 0.0.0.0:%s", port)
     uvicorn.run(
         "travel_agent.web.app:app",
         host="0.0.0.0",
