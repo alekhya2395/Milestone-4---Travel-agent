@@ -68,4 +68,5 @@ Before first `git push`: run `pytest tests/test_repo_hygiene.py` and confirm `.e
 | [implementation-plan.md](docs/implementation-plan.md) | Build phases |
 | [eval.md](docs/eval.md) | Milestone checklist |
 | [demo.md](docs/demo.md) | Demo script |
+| [stitch/](stitch/) | Google Stitch UI mockup + design system (`screen.png`, `DESIGN.md`) |
 | [edgecases.md](docs/edgecases.md) | Edge cases & fixtures |
